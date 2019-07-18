@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Game of Life</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	    <script src="functions.js"></script>
+	    <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <header>
+            <label>
+                Height:
+                <input id="y" class="size" type="number" min="1" max="100" value="50">
+            </label>
+            <label>
+                Width:
+                <input id="x" class="size" type="number" min="1" max="100" value="50">
+            </label>
+            <label>
+                FPS:
+                <input id="fps" type="number" min="1" max="60" value="10">
+            </label>
+            <button id="next">Next</button>
+            <button id="play">Play</button>
+        </header>
+        <main>
+            <div id="container">
+                <canvas id="game"></canvas>
+                <div id="menu"></div>
+            </div>
+        </main>
+        <footer>
+            <h6>Damorn Tydé-2019</h6>
+        </footer>
+    </body>
+</html>
