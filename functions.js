@@ -12,7 +12,7 @@ $(document).ready(function(){
 
     //autoplay
     buildGame();
-    timing = 1000 / Number($("#fps").val);
+    timing = 1000 / Number($("#fps").val());
 
 
     //events
@@ -21,7 +21,7 @@ $(document).ready(function(){
     });
 
     $(document).on("change", "#fps", function(){
-        timing = 1000 / Number($("#fps").val);
+        timing = 1000 / Number($("#fps").val());
         if(play){
             clearInterval(timer);
             timer = setInterval(nextGen, timing);
