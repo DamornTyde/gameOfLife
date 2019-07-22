@@ -3,12 +3,13 @@ $(document).ready(function(){
     var game = [],
         calc,
         grid = 10,
-        timing,
-        timer,
-        mem = "";
         play = false,
         canvas = document.getElementById("game"),
-        ctx = canvas.getContext("2d");
+        ctx = canvas.getContext("2d"),
+        mousedown = false,
+        life,
+        canvasx = $(canvas).offset().left,
+        canvasy = $(canvas).offset().top;
 
 
     //autoplay
@@ -29,10 +30,28 @@ $(document).ready(function(){
         }
     });
 
-    $(document).on("click", ".cell", function(){
-        var y = Number($(this).data("y")),
-            x = Number($(this).data("x"));
+    $(document).on("mousedown", "#game", function(e){
+        var y = Math.floor((e.clientY - canvasy) / grid),
+            x = Math.floor((e.clientX - canvasx) / grid);
+        mousedown = true;
+        if(game[y][x]){
+            life = false;
+        } else {
+            life = true;
+        }
         draw(y, x);
+    });
+
+    $(document).on("mousemove", "#game", function(e){
+        var y = Math.floor((e.clientY - canvasy) / grid),
+            x = Math.floor((e.clientX - canvasx) / grid);
+        if(mousedown){
+            maybe(y, x, life);
+        }
+    });
+
+    $(document).on("mouseup", "#game", function(){
+        mousedown = false;
     });
 
     $(document).on("click", "#next", function(){
@@ -51,17 +70,6 @@ $(document).ready(function(){
         }
     });
 
-    $(document).on("click", "#mem", function(){
-        var consent = true;
-        if(mem.length > 0){
-            consent = confirm("Are you sure you want to overwrite your memory?");
-        }
-        if(consent){
-            mem = save();
-            console.log(mem);
-        }
-    });
-
 
     //functions
     function buildGame(){
@@ -76,18 +84,24 @@ $(document).ready(function(){
         while(game.length < y){
             game.push(row.slice());
         }
-        for(i = 0; i < y; i++){
-            content += "<tr>";
-            for(i2 = 0; i2 < x; i2++){
-                content += "<td><button class='cell' data-y='" + i + "' data-x='" + i2 + "'></button></td>";
-            }
-            content += "</tr>";
-        }
         $("#menu").html(content + "</table>");
         canvas.height = y * grid;
         canvas.width = x * grid;
         ctx.fillStyle = "#fff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#888";
+        ctx.lineWidth = 2;
+        for(i = 0; i < y + 1 || i < x + 1; i++){
+            if(i < y + 1){
+                ctx.moveTo(0, i * grid);
+                ctx.lineTo(canvas.width, i * grid);
+            }
+            if(i < x + 1){
+                ctx.moveTo(i * grid, 0);
+                ctx.lineTo(i * grid, canvas.height);
+            }
+        }
+        ctx.stroke();
     }
 
     function draw(y, x){
@@ -98,7 +112,13 @@ $(document).ready(function(){
             game[y][x] = true;
             ctx.fillStyle = "#000";
         }
-        ctx.fillRect(x * grid, y * grid, grid, grid);
+        ctx.fillRect(x * grid + 1, y * grid + 1, grid - 2, grid - 2);
+    }
+
+    function maybe(y, x, hold){
+        if(game[y][x] !== hold){
+            draw(y, x);
+        }
     }
 
     function nextGen(){
@@ -144,28 +164,5 @@ $(document).ready(function(){
             return 1;
         }
         return 0;
-    }
-
-    function save(){
-        var content = {y:game.length, x:game[0].length, save:""},
-            i = 0,
-            i2 = 1,
-            temp = 0;
-            temp2 = "";
-        for(y = 0; y < game.length; y++){
-            for(x = 0; x < game[y].length; x++, i++, i2 = i2 * 2){
-                if(i == 16){
-                    i = 0;
-                    i2 = 1;
-                    temp2 += String.fromCodePoint(temp);
-                    temp = 0;
-                }
-                if(game[y][x]){
-                    temp += i2;
-                }
-            }
-        }
-        content.save = temp2;
-        return content;
     }
 });
