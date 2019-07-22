@@ -2,6 +2,8 @@ $(document).ready(function(){
     //variables
     var game = [],
         calc,
+        timing,
+        timer,
         grid = 10,
         play = false,
         canvas = document.getElementById("game"),
