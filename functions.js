@@ -1,84 +1,100 @@
 $(document).ready(function(){
-    //variables
     var game = [],
         calc,
         timing,
         timer,
-        grid = 10,
+        grid,
         play = false,
+        chaos = false,
         canvas = document.getElementById("game"),
         ctx = canvas.getContext("2d"),
         mousedown = false,
         life,
+        ChangeCount,
         canvasx = $(canvas).offset().left,
         canvasy = $(canvas).offset().top;
 
 
-    //autoplay
     buildGame();
     timing = 1000 / Number($("#fps").val());
 
 
-    //events
     $(document).on("change", ".size", function(){
         buildGame();
-    });
-
-    $(document).on("change", "#fps", function(){
+    }).on("change", "#fps", function(){
         timing = 1000 / Number($("#fps").val());
         if(play){
             clearInterval(timer);
             timer = setInterval(nextGen, timing);
         }
-    });
-
-    $(document).on("mousedown", "#game", function(e){
+    }).on("mousedown", "#game", function(e){
         var y = Math.floor((e.clientY - canvasy) / grid),
             x = Math.floor((e.clientX - canvasx) / grid);
         mousedown = true;
-        if(game[y][x]){
-            life = false;
-        } else {
-            life = true;
-        }
+        life = !game[y][x];
         draw(y, x);
-    });
-
-    $(document).on("mousemove", "#game", function(e){
+    }).on("mousemove", "#game", function(e){
         var y = Math.floor((e.clientY - canvasy) / grid),
             x = Math.floor((e.clientX - canvasx) / grid);
         if(mousedown){
             maybe(y, x, life);
         }
-    });
-
-    $(document).on("mouseup", "#game", function(){
+    }).on("mouseup", function(){
         mousedown = false;
-    });
-
-    $(document).on("click", "#next", function(){
+    }).on("click", "#next", function(){
         nextGen();
-    });
-
-    $(document).on("click", "#play", function(){
+    }).on("click", "#play", function(){
         if(play){
             clearInterval(timer);
             play = false;
             $("#next").prop("disabled", false);
+            $(this).removeClass("active");
         } else {
             timer = setInterval(nextGen, timing);
             play = true;
             $("#next").prop("disabled", true);
+            $(this).addClass("active");
+        }
+    }).on("click", "#clear", function(){
+        for(y = 0; y < game.length; y++){
+            for(x = 0; x < game[0].length; x++){
+                maybe(y, x, false);
+            }
+        }
+        if(play){
+            $("#play").click();
+        }
+    }).on("click", "#chaos", function(){
+        if(chaos){
+            chaos = false;
+            $(this).removeClass("active");
+        } else {
+            chaos = true;
+            $(this).addClass("active");
+        }
+    }).on("click", "#border", function(){
+        for(i = 0; i < game.length || i < game[0].length; i++){
+            if(i < game.length){
+                maybe(i, 0, true);
+                maybe(i, game[0].length - 1, true);
+            }
+            if(i < game[0].length){
+                maybe(0, i, true);
+                maybe(game.length - 1, i, true);
+            }
         }
     });
 
 
-    //functions
     function buildGame(){
+        calc = game.map(function(item){
+            return item.slice();
+        });
         var y = Number($("#y").val()),
             x = Number($("#x").val()),
             row = [],
             content = "<table>";
+        grid = Number($("#grid").val());
         game.splice(0, game.length);
         while(row.length < x){
             row.push(false);
@@ -104,6 +120,11 @@ $(document).ready(function(){
             }
         }
         ctx.stroke();
+        for(y2 = 0; y2 < calc.length && y2 < game.length; y2++){
+            for(x2 = 0; x2 < calc[y2].length && x2 < game[y2].length; x2++){
+                maybe(y2, x2, calc[y2][x2]);
+            }
+        }
     }
 
     function draw(y, x){
@@ -115,6 +136,9 @@ $(document).ready(function(){
             ctx.fillStyle = "#000";
         }
         ctx.fillRect(x * grid + 1, y * grid + 1, grid - 2, grid - 2);
+        if(chaos){
+            changeCount++;
+        }
     }
 
     function maybe(y, x, hold){
@@ -124,6 +148,7 @@ $(document).ready(function(){
     }
 
     function nextGen(){
+        changeCount = 0;
         calc = game.map(function(item){
             return item.slice();
         });
@@ -131,6 +156,14 @@ $(document).ready(function(){
             for(x = 0; x < game[y].length; x++){
                 calculate(y, x);
             }
+        }
+        if(chaos){
+            var y = Math.floor(Math.random() * game.length),
+                x = Math.floor(Math.random() * game[y].length);
+            maybe(y, x, true);
+        }
+        if(play && chaos && changeCount < 2){
+            $("#border").click();
         }
     }
 

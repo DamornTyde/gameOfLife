@@ -3,6 +3,10 @@
     cursor: crosshair;
 }
 
+.active{
+    font-weight: bold;
+}
+
 header{
     position: fixed;
     top: 0;
