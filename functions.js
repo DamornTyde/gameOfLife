@@ -10,7 +10,7 @@ $(document).ready(function(){
         ctx = canvas.getContext("2d"),
         mousedown = false,
         life,
-        ChangeCount,
+        temp = [],
         canvasx = $(canvas).offset().left,
         canvasy = $(canvas).offset().top;
 
@@ -32,7 +32,7 @@ $(document).ready(function(){
             x = Math.floor((e.clientX - canvasx) / grid);
         mousedown = true;
         life = !game[y][x];
-        draw(y, x);
+        draw([{y:y, x:x}]);
     }).on("mousemove", "#game", function(e){
         var y = Math.floor((e.clientY - canvasy) / grid),
             x = Math.floor((e.clientX - canvasx) / grid);
@@ -83,6 +83,13 @@ $(document).ready(function(){
                 maybe(game.length - 1, i, true);
             }
         }
+    }).on("click", "#test", function(){
+        var start = Date.now();
+        for(i = 0; i < 1000; i++){
+            nextGen();
+        }
+        var result = Date.now() - start;
+        console.log(result + "ms");
     });
 
 
@@ -127,31 +134,27 @@ $(document).ready(function(){
         }
     }
 
-    function draw(y, x){
-        if(game[y][x]){
-            game[y][x] = false;
-            ctx.fillStyle = "#fff";
-        } else {
-            game[y][x] = true;
-            ctx.fillStyle = "#000";
-        }
-        ctx.fillRect(x * grid + 1, y * grid + 1, grid - 2, grid - 2);
-        if(chaos){
-            changeCount++;
-        }
+    function draw(temp2){
+        temp2.forEach(function(item){
+            if(game[item.y][item.x]){
+                game[item.y][item.x] = false;
+                ctx.fillStyle = "#fff";
+            } else {
+                game[item.y][item.x] = true;
+                ctx.fillStyle = "#000";
+            }
+            ctx.fillRect(item.x * grid + 1, item.y * grid + 1, grid - 2, grid - 2);
+        });
     }
 
     function maybe(y, x, hold){
         if(game[y][x] !== hold){
-            draw(y, x);
+            draw([{y:y, x:x}]);
         }
     }
 
     function nextGen(){
-        changeCount = 0;
-        calc = game.map(function(item){
-            return item.slice();
-        });
+        temp.splice(0, temp.length);
         for(y = 0; y < game.length; y++){
             for(x = 0; x < game[y].length; x++){
                 calculate(y, x);
@@ -162,20 +165,21 @@ $(document).ready(function(){
                 x = Math.floor(Math.random() * game[y].length);
             maybe(y, x, true);
         }
-        if(play && chaos && changeCount < 2){
+        if(play && chaos && temp.length < 2){
             $("#border").click();
         }
+        draw(temp);
     }
 
     function calculate(y, x){
         var count = neighbors(y, x, false);
         if(game[y][x]){
             if(count < 2 || count > 3){
-                draw(y, x);
+                temp.push({y:y, x:x});
             }
         } else {
             if(count == 3){
-                draw(y, x);
+                temp.push({y:y, x:x});
             }
         }
     }
@@ -195,7 +199,7 @@ $(document).ready(function(){
     }
 
     function check(y, x){
-        if(y >= 0 && x >= 0 && y < game.length && x < game[y].length && calc[y][x]){
+        if(y >= 0 && x >= 0 && y < game.length && x < game[y].length && game[y][x]){
             return 1;
         }
         return 0;
