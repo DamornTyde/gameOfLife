@@ -4,6 +4,8 @@ $(document).ready(function(){
         timing,
         timer,
         grid,
+        midY,
+        midX,
         play = false,
         chaos = false,
         canvas = document.getElementById("game"),
@@ -83,6 +85,13 @@ $(document).ready(function(){
                 maybe(game.length - 1, i, true);
             }
         }
+    }).on("click", "#tank", function(){
+        maybe(midY, midX, true);
+        maybe(midY - 1, midX, true);
+        maybe(midY, midX - 1, true);
+        maybe(midY, midX + 1, true);
+        maybe(midY + 1, midX - 1, true);
+        maybe(midY + 1, midX + 1, true);
     }).on("click", "#test", function(){
         var start = Date.now();
         for(i = 0; i < 1000; i++){
@@ -103,6 +112,8 @@ $(document).ready(function(){
             content = "<table>";
         grid = Number($("#grid").val());
         game.splice(0, game.length);
+        midY = Math.floor(y / 2);
+        midX = Math.floor(x / 2);
         while(row.length < x){
             row.push(false);
         }
