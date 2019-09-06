@@ -1,4 +1,4 @@
-$(document).ready(function(){
+document.addEventListener('DOMContentLoaded', function(event){
     var game = [],
         calc,
         timing,
@@ -13,68 +13,85 @@ $(document).ready(function(){
         mousedown = false,
         life,
         temp = [],
-        canvasx = $(canvas).offset().left,
-        canvasy = $(canvas).offset().top;
+        canvasx = canvas.offsetLeft,
+        canvasy = canvas.offsetTop,
+        size = document.getElementsByClassName("size");
 
 
     buildGame();
-    timing = 1000 / Number($("#fps").val());
+    timing = 1000 / Number(document.getElementById("fps").value);
 
 
-    $(document).on("change", ".size", function(){
-        buildGame();
-    }).on("change", "#fps", function(){
-        timing = 1000 / Number($("#fps").val());
+    Array.from(size).forEach(function(element){
+        element.addEventListener('click', buildGame);
+    });
+
+    document.getElementById("fps").addEventListener("change", function(){
+        timing = 1000 / Number(document.getElementById("fps").value);
         if(play){
             clearInterval(timer);
             timer = setInterval(nextGen, timing);
         }
-    }).on("mousedown", "#game", function(e){
+    });
+
+    document.getElementById("game").addEventListener("mousedown", function(e){
         var y = Math.floor((e.clientY - canvasy) / grid),
             x = Math.floor((e.clientX - canvasx) / grid);
         mousedown = true;
         life = !game[y][x];
         draw([{y:y, x:x}]);
-    }).on("mousemove", "#game", function(e){
+    });
+
+    document.getElementById("game").addEventListener("mousemove", function(e){
         var y = Math.floor((e.clientY - canvasy) / grid),
             x = Math.floor((e.clientX - canvasx) / grid);
         if(mousedown){
             maybe(y, x, life);
         }
-    }).on("mouseup", function(){
+    });
+
+    document.addEventListener("mouseup", function(){
         mousedown = false;
-    }).on("click", "#next", function(){
-        nextGen();
-    }).on("click", "#play", function(){
+    });
+
+    document.getElementById("next").addEventListener("click", nextGen);
+
+    document.getElementById("play").addEventListener("click", function(){
         if(play){
             clearInterval(timer);
             play = false;
-            $("#next").prop("disabled", false);
-            $(this).removeClass("active");
+            document.getElementById("next").disabled = false;
+            this.classList.remove("active");
         } else {
             timer = setInterval(nextGen, timing);
             play = true;
-            $("#next").prop("disabled", true);
-            $(this).addClass("active");
+            document.getElementById("next").disabled = true;
+            this.classList.add("active");
         }
-    }).on("click", "#clear", function(){
+    });
+
+    document.getElementById("clear").addEventListener("click", function(){
         for(y = 0; y < game.length; y++){
             for(x = 0; x < game[0].length; x++){
                 maybe(y, x, false);
             }
         }
         if(play){
-            $("#play").click();
+            document.getElementById("play").click();
         }
-    }).on("click", "#chaos", function(){
+    });
+
+    document.getElementById("chaos").addEventListener("click", function(){
         if(chaos){
             chaos = false;
-            $(this).removeClass("active");
+            this.classList.remove("active");
         } else {
             chaos = true;
-            $(this).addClass("active");
+            this.classList.add("active");
         }
-    }).on("click", "#border", function(){
+    });
+
+    document.getElementById("border").addEventListener("click", function(){
         for(i = 0; i < game.length || i < game[0].length; i++){
             if(i < game.length){
                 maybe(i, 0, true);
@@ -85,14 +102,18 @@ $(document).ready(function(){
                 maybe(game.length - 1, i, true);
             }
         }
-    }).on("click", "#tank", function(){
+    });
+
+    document.getElementById("tank").addEventListener("click", function(){
         maybe(midY, midX, true);
         maybe(midY - 1, midX, true);
         maybe(midY, midX - 1, true);
         maybe(midY, midX + 1, true);
         maybe(midY + 1, midX - 1, true);
         maybe(midY + 1, midX + 1, true);
-    }).on("click", "#test", function(){
+    });
+
+    document.getElementById("test").addEventListener("click", function(){
         var start = Date.now();
         for(i = 0; i < 1000; i++){
             nextGen();
@@ -106,11 +127,10 @@ $(document).ready(function(){
         calc = game.map(function(item){
             return item.slice();
         });
-        var y = Number($("#y").val()),
-            x = Number($("#x").val()),
-            row = [],
-            content = "<table>";
-        grid = Number($("#grid").val());
+        var y = Number(document.getElementById("y").value),
+            x = Number(document.getElementById("x").value),
+            row = [];
+            grid = Number(document.getElementById("grid").value);
         game.splice(0, game.length);
         midY = Math.floor(y / 2);
         midX = Math.floor(x / 2);
@@ -120,7 +140,6 @@ $(document).ready(function(){
         while(game.length < y){
             game.push(row.slice());
         }
-        $("#menu").html(content + "</table>");
         canvas.height = y * grid;
         canvas.width = x * grid;
         ctx.fillStyle = "#fff";
@@ -177,7 +196,7 @@ $(document).ready(function(){
             maybe(y, x, true);
         }
         if(play && chaos && temp.length < 2){
-            $("#border").click();
+            document.getElementById("border").click();
         }
         draw(temp);
     }
