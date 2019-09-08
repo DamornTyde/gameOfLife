@@ -197,6 +197,7 @@ document.addEventListener('DOMContentLoaded', function(event){
                 }
             }
         }
+        draw(temp);
         if(chaos){
             var y = Math.floor(Math.random() * game.length),
                 x = Math.floor(Math.random() * game[y].length);
@@ -205,7 +206,6 @@ document.addEventListener('DOMContentLoaded', function(event){
         if(play && chaos && temp.length < 2){
             document.getElementById("border").click();
         }
-        draw(temp);
     }
 
     function neighbors(y, x, r){
