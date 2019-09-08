@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function(event){
     var game = [],
-        calc,
         timing,
         timer,
         grid,
@@ -123,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function(event){
 
 
     function buildGame(){
-        calc = game.map(function(item){
+        var calc = game.map(function(item){
             return item.slice();
         });
         var y = Number(document.getElementById("y").value),
