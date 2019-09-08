@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function(event){
         ctx = canvas.getContext("2d"),
         mousedown = false,
         life,
-        temp = [],
         canvasx = canvas.offsetLeft,
         canvasy = canvas.offsetTop,
         size = document.getElementsByClassName("size");
@@ -184,10 +183,19 @@ document.addEventListener('DOMContentLoaded', function(event){
     }
 
     function nextGen(){
-        temp.splice(0, temp.length);
+        var temp = [];
         for(y = 0; y < game.length; y++){
             for(x = 0; x < game[y].length; x++){
-                calculate(y, x);
+                var count = neighbors(y, x, false);
+                if(game[y][x]){
+                    if(count < 2 || count > 3){
+                        temp.push({y:y, x:x});
+                    }
+                } else {
+                    if(count == 3){
+                        temp.push({y:y, x:x});
+                    }
+                }
             }
         }
         if(chaos){
@@ -199,19 +207,6 @@ document.addEventListener('DOMContentLoaded', function(event){
             document.getElementById("border").click();
         }
         draw(temp);
-    }
-
-    function calculate(y, x){
-        var count = neighbors(y, x, false);
-        if(game[y][x]){
-            if(count < 2 || count > 3){
-                temp.push({y:y, x:x});
-            }
-        } else {
-            if(count == 3){
-                temp.push({y:y, x:x});
-            }
-        }
     }
 
     function neighbors(y, x, r){
