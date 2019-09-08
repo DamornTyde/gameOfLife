@@ -163,8 +163,8 @@ document.addEventListener('DOMContentLoaded', function(event){
         }
     }
 
-    function draw(temp2){
-        temp2.forEach(function(item){
+    function draw(temp){
+        temp.forEach(function(item){
             if(game[item.y][item.x]){
                 game[item.y][item.x] = false;
                 ctx.fillStyle = "#fff";
