@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function(event){
                     state = state2;
                 }
             }
-            if(tempLength == 0 || state){
+            if(state){
                 if(border){
                     document.getElementById("border").click();
                 } 
