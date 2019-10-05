@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function(event){
         play = false,
         chaos = false,
         border = false,
+        tank = false,
         canvas = document.getElementById("game"),
         ctx = canvas.getContext("2d"),
         mousedown = false,
@@ -85,10 +86,12 @@ document.addEventListener('DOMContentLoaded', function(event){
         if(chaos){
             chaos = false;
             document.getElementById("autoB").disabled = false;
+            document.getElementById("tankB").disabled = false;
             this.classList.remove("active");
         } else {
             chaos = true;
             document.getElementById("autoB").disabled = true;
+            document.getElementById("tankB").disabled = true;
             this.classList.add("active");
         }
     });
@@ -96,10 +99,26 @@ document.addEventListener('DOMContentLoaded', function(event){
     document.getElementById("autoB").addEventListener("click", function(){
         if(border){
             border = false;
-            document.getElementById("chaos").disabled = false;
+            if(tank === false){
+                document.getElementById("chaos").disabled = false;
+            }
             this.classList.remove("active");
         } else {
             border = true;
+            document.getElementById("chaos").disabled = true;
+            this.classList.add("active");
+        }
+    });
+
+    document.getElementById("tankB").addEventListener("click", function(){
+        if(tank){
+            tank = false;
+            if(border === false){
+                document.getElementById("chaos").disabled = false;
+            }
+            this.classList.remove("active");
+        } else {
+            tank = true;
             document.getElementById("chaos").disabled = true;
             this.classList.add("active");
         }
@@ -218,13 +237,30 @@ document.addEventListener('DOMContentLoaded', function(event){
             var y = Math.floor(Math.random() * game.length),
                 x = Math.floor(Math.random() * game[y].length);
             maybe(y, x, true);
-        }
-        if(play && chaos && temp.length < 2){
-            document.getElementById("border").click();
-        }
-        if(border){
-            if(temp.length == 0 || same(temp)){
+            if(play && temp.length < 2){
                 document.getElementById("border").click();
+            }
+        } else if(border || tank){
+            var state = false,
+                tempLength = temp.length;
+            for(i = 0; i < past.length && state === false; i++){
+                if(past[i].length == tempLength){
+                    var state2 = true;
+                    for(i2 = 0; i2 < tempLength && state2; i2++){
+                        if(past[i][i2].y != temp[i2].y || past[i][i2].x != temp[i2].x){
+                            state2 = false;
+                        }
+                    }
+                    state = state2;
+                }
+            }
+            if(tempLength == 0 || state){
+                if(border){
+                    document.getElementById("border").click();
+                } 
+                if(tank){
+                    document.getElementById("tank").click();
+                }
             }
             past.push(temp.slice());
             if(past.length > 20){
@@ -252,22 +288,5 @@ document.addEventListener('DOMContentLoaded', function(event){
             return 1;
         }
         return 0;
-    }
-
-    function same(temp){
-        var state = false,
-            tempLength = temp.length;
-        for(i = 0; i < past.length && state === false; i++){
-            if(past[i].length == tempLength){
-                var state2 = true;
-                for(i2 = 0; i2 < tempLength && state2; i2++){
-                    if(past[i][i2].y != temp[i2].y || past[i][i2].x != temp[i2].x){
-                        state2 = false;
-                    }
-                }
-                state = state2;
-            }
-        }
-        return state;
     }
 });
