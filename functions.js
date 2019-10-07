@@ -256,18 +256,17 @@ function check(y, x){
 
 function buttonSwitch(thisButton, otherButtons, thisVar, otherVar){
     if(thisVar){
-        thisButton.classList.remove("active");
         if(otherVar === false){
             otherButtons.forEach(function(item){
                 document.getElementById(item).disabled = false;
             });
         }
     } else {
-        thisButton.classList.add("active");
         otherButtons.forEach(function(item){
             document.getElementById(item).disabled = true;
         });
     }
+    thisButton.classList.toggle("active");
     thisVar = !thisVar;
     return thisVar;
 }
