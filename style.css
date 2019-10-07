@@ -1,3 +1,8 @@
+*{
+    margin : 0px;
+    border : 0px;
+}
+
 #game{
     border:1px solid #888;
     cursor: crosshair;
@@ -32,16 +37,23 @@ main{
 
 h6{
     margin: 0;
+    margin-left: 5px;
 }
 
 button{
     cursor: pointer;
+    border: 1px gray solid;
 }
 
 input{
     width: 40px;
+    border: 1px gray solid;
 }
 
 label{
+    margin-left: 5px;
+}
+
+canvas{
     margin-left: 5px;
 }
