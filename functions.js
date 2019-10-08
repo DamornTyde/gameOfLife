@@ -9,6 +9,7 @@ var game = [],
     chaos = false,
     border = false,
     tank = false,
+    random = false,
     canvas = document.getElementById("game"),
     ctx = canvas.getContext("2d"),
     mousedown = false,
@@ -77,15 +78,19 @@ document.getElementById("clear").addEventListener("click", function(){
 });
 
 document.getElementById("chaos").addEventListener("click", function(){
-    chaos = buttonSwitch(this, ["borderB", "tankB"], chaos, false);
+    chaos = buttonSwitch(this, ["borderB", "tankB", "randomB"], chaos, false);
 });
 
 document.getElementById("borderB").addEventListener("click", function(){
-    border = buttonSwitch(this, ["chaos"], border, tank);
+    border = buttonSwitch(this, ["chaos", "randomB"], border, tank);
 });
 
 document.getElementById("tankB").addEventListener("click", function(){
-    tank = buttonSwitch(this, ["chaos"], tank, border);
+    tank = buttonSwitch(this, ["chaos", "randomB"], tank, border);
+});
+
+document.getElementById("randomB").addEventListener("click", function(){
+    random = buttonSwitch(this, ["chaos", "borderB", "tankB"], random, false);
 });
 
 document.getElementById("border").addEventListener("click", function(){
@@ -108,6 +113,16 @@ document.getElementById("tank").addEventListener("click", function(){
     maybe(midY, midX + 1, true);
     maybe(midY + 1, midX - 1, true);
     maybe(midY + 1, midX + 1, true);
+});
+
+document.getElementById("random").addEventListener("click", function(){
+    for(y = 0; y < game.length; y++){
+        for(x = 0; x < game[y].length; x++){
+            if(Math.random() * 101 < 50){
+                draw([{y:y, x:x}]);
+            }
+        }
+    }
 });
 
 document.getElementById("test").addEventListener("click", function(){
@@ -204,7 +219,7 @@ function nextGen(){
         if(play && temp.length < 2){
             document.getElementById("border").click();
         }
-    } else if(border || tank){
+    } else if(border || tank || random){
         var state = false,
             tempLength = temp.length;
         for(i = 0; i < past.length && state === false; i++){
@@ -224,6 +239,9 @@ function nextGen(){
             } 
             if(tank){
                 document.getElementById("tank").click();
+            }
+            if(random){
+                document.getElementById("random").click();
             }
         }
         past.push(temp.slice());
@@ -255,18 +273,12 @@ function check(y, x){
 }
 
 function buttonSwitch(thisButton, otherButtons, thisVar, otherVar){
-    if(thisVar){
-        if(otherVar === false){
-            otherButtons.forEach(function(item){
-                document.getElementById(item).disabled = false;
-            });
-        }
-    } else {
+    thisVar = !thisVar;
+    if(otherVar === false){
         otherButtons.forEach(function(item){
-            document.getElementById(item).disabled = true;
+            document.getElementById(item).disabled = thisVar;
         });
     }
     thisButton.classList.toggle("active");
-    thisVar = !thisVar;
     return thisVar;
 }
