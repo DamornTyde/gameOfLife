@@ -10,6 +10,7 @@ var game = [],
     border = false,
     tank = false,
     random = false,
+    demo = false,
     canvas = document.getElementById("game"),
     ctx = canvas.getContext("2d"),
     mousedown = false,
@@ -125,6 +126,17 @@ document.getElementById("random").addEventListener("click", function(){
     }
 });
 
+document.getElementById("demo").addEventListener("click", function(){
+    demo = true;
+    document.getElementById("y").value = 200;
+    document.getElementById("x").value = 1;
+    document.getElementById("grid").value = 5;
+    buildGame();
+    document.getElementById("border").click();
+    document.getElementById("clear").click();
+    document.getElementById("play").click();
+});
+
 document.getElementById("test").addEventListener("click", function(){
     var start = Date.now();
     for(i = 0; i < 1000; i++){
@@ -212,6 +224,9 @@ function nextGen(){
         }
     }
     draw(temp);
+    if(demo && document.getElementById("demo").classList.contains("active") === false){
+        buttonSwitch(document.getElementById("demo"), ["play", "demo"], false, false);
+    }
     if(chaos){
         var y = Math.floor(Math.random() * game.length),
             x = Math.floor(Math.random() * game[y].length);
@@ -219,7 +234,7 @@ function nextGen(){
         if(play && temp.length < 2){
             document.getElementById("border").click();
         }
-    } else if(border || tank || random){
+    } else if(border || tank || random || demo){
         var state = false,
             tempLength = temp.length;
         for(i = 0; i < past.length && state === false; i++){
@@ -243,9 +258,21 @@ function nextGen(){
             if(random){
                 document.getElementById("random").click();
             }
+            if(demo){
+                var x = document.getElementById("x").value;
+                if(x < 380){
+                    x++;
+                    document.getElementById("x").value = x;
+                    buildGame();
+                    document.getElementById("border").click();
+                } else {
+                    demo = buttonSwitch(document.getElementById("demo"), ["play", "demo"], demo, false);
+                    document.getElementById("play").click();
+                }
+            }
         }
         past.push(temp.slice());
-        if(past.length > 20){
+        if(past.length > 60){
             past.shift();
         }
     }
