@@ -79,19 +79,19 @@ document.getElementById("clear").addEventListener("click", function(){
 });
 
 document.getElementById("chaos").addEventListener("click", function(){
-    chaos = buttonSwitch(this, ["borderB", "tankB", "randomB"], chaos, false);
+    chaos = buttonSwitch(this, ["borderB", "tankB", "randomB", "demo"], chaos, false);
 });
 
 document.getElementById("borderB").addEventListener("click", function(){
-    border = buttonSwitch(this, ["chaos", "randomB"], border, tank);
+    border = buttonSwitch(this, ["chaos", "randomB", "demo"], border, tank);
 });
 
 document.getElementById("tankB").addEventListener("click", function(){
-    tank = buttonSwitch(this, ["chaos", "randomB"], tank, border);
+    tank = buttonSwitch(this, ["chaos", "randomB", "demo"], tank, border);
 });
 
 document.getElementById("randomB").addEventListener("click", function(){
-    random = buttonSwitch(this, ["chaos", "borderB", "tankB"], random, false);
+    random = buttonSwitch(this, ["chaos", "borderB", "tankB", "demo"], random, false);
 });
 
 document.getElementById("border").addEventListener("click", function(){
@@ -225,7 +225,7 @@ function nextGen(){
     }
     draw(temp);
     if(demo && document.getElementById("demo").classList.contains("active") === false){
-        buttonSwitch(document.getElementById("demo"), ["play", "demo"], false, false);
+        buttonSwitch(document.getElementById("demo"), ["next", "play", "borderB", "tankB", "randomB", "demo"], false, false);
     }
     if(chaos){
         var y = Math.floor(Math.random() * game.length),
@@ -266,7 +266,7 @@ function nextGen(){
                     buildGame();
                     document.getElementById("border").click();
                 } else {
-                    demo = buttonSwitch(document.getElementById("demo"), ["play", "demo"], demo, false);
+                    demo = buttonSwitch(document.getElementById("demo"), ["next", "play", "borderB", "tankB", "randomB", "demo"], demo, false);
                     document.getElementById("play").click();
                 }
             }
