@@ -1,59 +1,17 @@
-*{
-    margin : 0px;
-    border : 0px;
-}
-
-#game{
-    border:1px solid #888;
-    cursor: crosshair;
-}
-
-.active{
-    font-weight: bold;
-}
-
-header{
-    position: fixed;
-    top: 0;
-    background-color: #fff;
-    z-index: 1;
-    width: 100%;
-    line-height: 30px;
-}
-
-footer{
-    position: fixed;
-    bottom: 0;
-    background-color: #fff;
-    z-index: 1;
-    width: 100%;
-    line-height: 20px;
-}
-
-main{
-    margin-top: 35px;
-    margin-bottom: 25px;
-}
-
-h6{
+* {
+    padding: 0;
     margin: 0;
-    margin-left: 5px;
 }
 
-button{
-    cursor: pointer;
+header, canvas {
+    margin: .3em;
+}
+
+canvas {
     border: 1px gray solid;
 }
 
-input{
-    width: 40px;
-    border: 1px gray solid;
-}
-
-label{
-    margin-left: 5px;
-}
-
-canvas{
-    margin-left: 5px;
+.active {
+    background-color: black;
+    color: white;
 }

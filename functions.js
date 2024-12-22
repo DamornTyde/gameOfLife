@@ -1,311 +1,315 @@
-var game = [],
-    past = [],
-    timing,
-    timer,
-    grid,
-    midY,
-    midX,
-    play = false,
-    chaos = false,
-    border = false,
-    tank = false,
-    random = false,
-    demo = false,
-    canvas = document.getElementById("game"),
-    ctx = canvas.getContext("2d"),
-    mousedown = false,
-    life,
-    canvasx = canvas.offsetLeft,
-    canvasy = canvas.offsetTop,
-    size = document.getElementsByClassName("size");
+//menu
+const heightInput = document.querySelector('#y');
+const widthInput = document.querySelector('#x');
+const sizeInput = document.querySelector('#grid');
+const size = document.querySelectorAll('.size');
 
+const fps = document.querySelector('#fps');
 
-buildGame();
-timing = 1000 / Number(document.getElementById("fps").value);
+const next = document.querySelector('#next');
+const play = document.querySelector('#play');
+const clear = document.querySelector('#clear');
+const chaos = document.querySelector('#chaos');
+const autoBorder = document.querySelector('#borderB');
+const autoTank = document.querySelector('#tankB');
+const autoRandom = document.querySelector('#randomB');
+const border = document.querySelector('#border');
+const tank = document.querySelector('#tank');
+const random = document.querySelector('#random');
 
+const canvas = document.querySelector('#game');
+const ctx = canvas.getContext('2d');
 
-Array.from(size).forEach(function(element){
-    element.addEventListener("change", buildGame);
-});
+//memory
+let gameHeight = Number(heightInput.value);
+let gameWidth = Number(widthInput.value);
+let grid = Number(sizeInput.value);
 
-document.getElementById("fps").addEventListener("change", function(){
-    timing = 1000 / Number(document.getElementById("fps").value);
-    if(play){
-        clearInterval(timer);
-        timer = setInterval(nextGen, timing);
+let game = buildArray();
+let change = [];
+const history = [];
+
+let mousedown = false;
+let life = false;
+
+let fpsInterval = 1000 / fps.value;
+let then;
+let animate = false;
+
+let chaosTheory = false;
+let borderA = false;
+let tankA = false;
+let randomA = false;
+
+//objects
+class coor {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
     }
-});
+}
 
-document.getElementById("game").addEventListener("mousedown", function(e){
-    var y = Math.floor((e.clientY - canvasy) / grid),
-        x = Math.floor((e.clientX - canvasx) / grid);
+//input
+canvas.addEventListener('mousedown', e => {
+    const x = row(e);
+    const y = colom(e);
     mousedown = true;
-    life = !game[y][x];
-    draw([{y:y, x:x}]);
+    life = !game[x][y];
+    flip(new coor(x, y));
 });
 
-document.getElementById("game").addEventListener("mousemove", function(e){
-    var y = Math.floor((e.clientY - canvasy) / grid),
-        x = Math.floor((e.clientX - canvasx) / grid);
-    if(mousedown){
-        maybe(y, x, life);
+canvas.addEventListener('mousemove', e => {
+    const cell = new coor(row(e), colom(e));
+    if (mousedown && cellExist(cell)) {
+        maybe(cell, life);
     }
 });
 
-document.addEventListener("mouseup", function(){
+document.addEventListener('mouseup', () => {
     mousedown = false;
 });
 
-document.getElementById("next").addEventListener("click", nextGen);
-
-document.getElementById("play").addEventListener("click", function(){
-    if(play){
-        clearInterval(timer);
-    } else {
-        timer = setInterval(nextGen, timing);
-    }
-    play = buttonSwitch(this, ["next"], play, false);
-});
-
-document.getElementById("clear").addEventListener("click", function(){
-    for(y = 0; y < game.length; y++){
-        for(x = 0; x < game[0].length; x++){
-            maybe(y, x, false);
-        }
-    }
-    if(play){
-        document.getElementById("play").click();
-    }
-});
-
-document.getElementById("chaos").addEventListener("click", function(){
-    chaos = buttonSwitch(this, ["borderB", "tankB", "randomB", "demo"], chaos, false);
-});
-
-document.getElementById("borderB").addEventListener("click", function(){
-    border = buttonSwitch(this, ["chaos", "randomB", "demo"], border, tank);
-});
-
-document.getElementById("tankB").addEventListener("click", function(){
-    tank = buttonSwitch(this, ["chaos", "randomB", "demo"], tank, border);
-});
-
-document.getElementById("randomB").addEventListener("click", function(){
-    random = buttonSwitch(this, ["chaos", "borderB", "tankB", "demo"], random, false);
-});
-
-document.getElementById("border").addEventListener("click", function(){
-    for(i = 0; i < game.length || i < game[0].length; i++){
-        if(i < game.length){
-            maybe(i, 0, true);
-            maybe(i, game[0].length - 1, true);
-        }
-        if(i < game[0].length){
-            maybe(0, i, true);
-            maybe(game.length - 1, i, true);
-        }
-    }
-});
-
-document.getElementById("tank").addEventListener("click", function(){
-    maybe(midY, midX, true);
-    maybe(midY - 1, midX, true);
-    maybe(midY, midX - 1, true);
-    maybe(midY, midX + 1, true);
-    maybe(midY + 1, midX - 1, true);
-    maybe(midY + 1, midX + 1, true);
-});
-
-document.getElementById("random").addEventListener("click", function(){
-    for(y = 0; y < game.length; y++){
-        for(x = 0; x < game[y].length; x++){
-            if(Math.random() * 101 < 50){
-                draw([{y:y, x:x}]);
-            }
-        }
-    }
-});
-
-document.getElementById("demo").addEventListener("click", function(){
-    demo = true;
-    document.getElementById("y").value = 200;
-    document.getElementById("x").value = 1;
-    document.getElementById("grid").value = 5;
+document.querySelectorAll('.size').forEach(e => e.addEventListener('change', () => {
+    const temp = game.map(i => i);
+    gameHeight = Number(heightInput.value);
+    gameWidth = Number(widthInput.value);
+    grid = Number(sizeInput.value);
+    game = buildArray();
     buildGame();
-    document.getElementById("border").click();
-    document.getElementById("clear").click();
-    document.getElementById("play").click();
+    temp.forEach((r, x) => r.forEach((c, y) => {
+        const cell = new coor(x, y);
+        if (cellExist(cell)) {
+            maybe(cell, c);
+        }
+    }));
+}));
+
+fps.addEventListener('change', () => {
+    fpsInterval = 1000 / fps.value;
 });
 
-document.getElementById("test").addEventListener("click", function(){
-    var start = Date.now();
-    for(i = 0; i < 1000; i++){
-        nextGen();
+next.addEventListener('click', calc);
+
+play.addEventListener('click', () => {
+    if (animate) {
+        animate = !animate;
+        play.classList.remove('active');
+    } else {
+        animate = !animate;
+        then = window.performance.now();
+        requestAnimationFrame(newGen);
+        play.classList.add('active');
     }
-    var result = Date.now() - start;
-    console.log(result + "ms");
 });
 
+clear.addEventListener('click', () => {
+    game.forEach((r, x) => r.keys().forEach(y => maybe(new coor(x, y), false)));
+    if (animate) {
+        play.click();
+    }
+    if (chaosTheory) {
+        chaos.click();
+    }
+    if (borderA) {
+        autoBorder.click();
+    }
+    if (tankA) {
+        autoTank.click();
+    }
+    if (randomA) {
+        autoRandom.click();
+    }
+});
 
-function buildGame(){
-    var calc = game.map(function(item){
-        return item.slice();
-    });
-    var y = Number(document.getElementById("y").value),
-        x = Number(document.getElementById("x").value),
-        row = [];
-    grid = Number(document.getElementById("grid").value);
-    game.splice(0, game.length);
-    midY = Math.floor(y / 2);
-    midX = Math.floor(x / 2);
-    while(row.length < x){
-        row.push(false);
+chaos.addEventListener('click', () => {
+    if (chaosTheory) {
+        chaosTheory = !chaosTheory;
+        chaos.classList.remove('active');
+    } else {
+        chaosTheory = !chaosTheory;
+        chaos.classList.add('active');
     }
-    while(game.length < y){
-        game.push(row.slice());
+});
+
+autoBorder.addEventListener('click', () => {
+    if (borderA) {
+        borderA = !borderA;
+        autoBorder.classList.remove('active');
+    } else {
+        borderA = !borderA;
+        autoBorder.classList.add('active');
     }
-    canvas.height = y * grid;
-    canvas.width = x * grid;
-    ctx.fillStyle = "#fff";
+});
+
+autoTank.addEventListener('click', () => {
+    if (tankA) {
+        tankA = !tankA;
+        autoTank.classList.remove('active');
+    } else {
+        tankA = !tankA;
+        autoTank.classList.add('active');
+    }
+});
+
+autoRandom.addEventListener('click', () => {
+    if (randomA) {
+        randomA = !randomA;
+        autoRandom.classList.remove('active');
+    } else {
+        randomA = !randomA;
+        autoRandom.classList.add('active');
+    }
+});
+
+border.addEventListener('click', () => {
+    if (gameHeight > gameWidth) {
+        game.keys().forEach(gameBorder);
+    } else {
+        game[0].keys().forEach(gameBorder);
+    }
+});
+
+tank.addEventListener('click', () => {
+    const middle = new coor(Math.floor(gameHeight / 2), Math.floor(gameWidth / 2));
+    tankPart(middle);
+    for (let i = -1; i < 2; i += 2) {
+        tankPart(new coor(middle.x + 1, middle.y + i));
+    }
+});
+
+random.addEventListener('click', () => {
+    game.forEach((r, x) => r.keys().forEach(y => {
+        if (Math.random() > .5) {
+            flip(new coor(x, y))
+        }
+    }));
+});
+
+//functions
+function buildArray() {
+    return Array(Number(gameHeight)).fill().map(() => Array(Number(gameWidth)).fill(false));
+}
+
+function cellExist(cell) {
+    return cell.x > -1 && cell.x < game.length && cell.y > -1 && cell.y < game[cell.x].length;
+}
+
+function buildGame() {
+    canvas.height = (grid + 1) * gameHeight + 1;
+    canvas.width = (grid + 1) * gameWidth + 1;
+    ctx.fillStyle = 'gray';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "#888";
-    ctx.lineWidth = 2;
-    for(i = 0; i < y + 1 || i < x + 1; i++){
-        if(i < y + 1){
-            ctx.moveTo(0, i * grid);
-            ctx.lineTo(canvas.width, i * grid);
-        }
-        if(i < x + 1){
-            ctx.moveTo(i * grid, 0);
-            ctx.lineTo(i * grid, canvas.height);
-        }
-    }
-    ctx.stroke();
-    for(y2 = 0; y2 < calc.length && y2 < game.length; y2++){
-        for(x2 = 0; x2 < calc[y2].length && x2 < game[y2].length; x2++){
-            maybe(y2, x2, calc[y2][x2]);
-        }
-    }
+    game.forEach((r, x) => r.keys().forEach(y => draw(new coor(x, y))));
 }
 
-function draw(temp){
-    temp.forEach(function(item){
-        if(game[item.y][item.x]){
-            game[item.y][item.x] = false;
-            ctx.fillStyle = "#fff";
-        } else {
-            game[item.y][item.x] = true;
-            ctx.fillStyle = "#000";
+function calc() {
+    change = [];
+    game.map((r, x) => r.map((state, y) => {
+        const cell = new coor(x, y);
+        const score = darwin(cell);
+        if (state) {
+            return (score < 2 || score > 3) ? cell : [];
         }
-        ctx.fillRect(item.x * grid + 1, item.y * grid + 1, grid - 2, grid - 2);
-    });
-}
-
-function maybe(y, x, hold){
-    if(game[y][x] !== hold){
-        draw([{y:y, x:x}]);
+        return score === 3 ? cell : [];
+    })).forEach(flip);
+    if (chaosTheory) {
+        if (game.map(r => r.filter(c => c)).flat().length === 0) {
+            border.click();
+        }
+        maybe(new coor(Math.floor(Math.random() * game.length), Math.floor(Math.random() * game[0].length)), true);
     }
-}
-
-function nextGen(){
-    var temp = [];
-    for(y = 0; y < game.length; y++){
-        for(x = 0; x < game[y].length; x++){
-            var count = neighbors(y, x, false);
-            if(game[y][x]){
-                if(count < 2 || count > 3){
-                    temp.push({y:y, x:x});
-                }
-            } else {
-                if(count == 3){
-                    temp.push({y:y, x:x});
-                }
+    const automated = [borderA, tankA, randomA];
+    if (automated.findIndex(i => i) > -1) {
+        if (history.filter(i => i.length === change.length).findIndex(r => r.map((i, c) => i.x === change[c].x && i.y === change[c].y ? [] : c).flat().length === 0) > -1) {
+            if (automated[0]) {
+                border.click();
+            }
+            if (automated[1]) {
+                tank.click();
+            }
+            if (automated[2]) {
+                random.click();
             }
         }
     }
-    draw(temp);
-    if(demo && document.getElementById("demo").classList.contains("active") === false){
-        buttonSwitch(document.getElementById("demo"), ["next", "play", "borderB", "tankB", "randomB", "demo"], false, false);
+    history.push(change);
+    if (history.length > 100) {
+        history.shift();
     }
-    if(chaos){
-        var y = Math.floor(Math.random() * game.length),
-            x = Math.floor(Math.random() * game[y].length);
-        maybe(y, x, true);
-        if(play && temp.length < 2){
-            document.getElementById("border").click();
+}
+
+function draw(cell) {
+    ctx.fillStyle = game[cell.x][cell.y] ? 'black' : 'white';
+    ctx.fillRect((grid + 1) * cell.y + 1, (grid + 1) * cell.x + 1, grid, grid);
+}
+
+function flip(cell) {
+    if (Array.isArray(cell)) {
+        cell.forEach(flip);
+    } else {
+        game[cell.x][cell.y] = !game[cell.x][cell.y];
+        change.push(cell);
+        draw(cell);
+    }
+}
+
+function maybe(cell, hold) {
+    if (game[cell.x][cell.y] !== hold) {
+        flip(cell);
+    }
+}
+
+function alive(cell) {
+    return (cellExist(cell) && game[cell.x][cell.y]) ? 1 : 0;
+}
+
+function darwin(cell, rec = 0) {
+    let sum = 0;
+    for (let i = -1; i < 2; i += 2) {
+        sum += alive(new coor(cell.x + i, cell.y + rec));
+        if (rec === 0) {
+            sum += alive(new coor(cell.x, cell.y + i));
+            sum += darwin(cell, i);
         }
-    } else if(border || tank || random || demo){
-        var state = false,
-            tempLength = temp.length;
-        for(i = 0; i < past.length && state === false; i++){
-            if(past[i].length == tempLength){
-                var state2 = true;
-                for(i2 = 0; i2 < tempLength && state2; i2++){
-                    if(past[i][i2].y != temp[i2].y || past[i][i2].x != temp[i2].x){
-                        state2 = false;
-                    }
-                }
-                state = state2;
-            }
-        }
-        if(state){
-            if(border){
-                document.getElementById("border").click();
-            } 
-            if(tank){
-                document.getElementById("tank").click();
-            }
-            if(random){
-                document.getElementById("random").click();
-            }
-            if(demo){
-                var x = document.getElementById("x").value;
-                if(x < 380){
-                    x++;
-                    document.getElementById("x").value = x;
-                    buildGame();
-                    document.getElementById("border").click();
-                } else {
-                    demo = buttonSwitch(document.getElementById("demo"), ["next", "play", "borderB", "tankB", "randomB", "demo"], demo, false);
-                    document.getElementById("play").click();
-                }
-            }
-        }
-        past.push(temp.slice());
-        if(past.length > 60){
-            past.shift();
+    }
+    return sum;
+}
+
+function newGen() {
+    if (animate) {
+        requestAnimationFrame(newGen);
+        const now = window.performance.now();
+        const elapsed = now - then;
+        if (elapsed > fpsInterval) {
+            then = now - (elapsed % fpsInterval);
+            calc();
         }
     }
 }
 
-function neighbors(y, x, r){
-    var count = 0;
-    for(var i = -1; i < 2; i += 2){
-        if(r){
-            count += check(y, x + i);
-        } else {
-            count += check(y + i, x);
-            count += check(y, x + i);
-            count += neighbors(y + i, x, true);
-        }
-    }
-    return count;
+function gameBorder(i) {
+    const temp = [];
+    temp.push(new coor(0, i));
+    temp.push(new coor(gameHeight - 1, i));
+    temp.push(new coor(i, 0));
+    temp.push(new coor(i, gameWidth - 1));
+    temp.filter(cellExist).forEach(c => maybe(c, true));
 }
 
-function check(y, x){
-    if(y >= 0 && x >= 0 && y < game.length && x < game[y].length && game[y][x]){
-        return 1;
-    }
-    return 0;
+function tankPart(cell) {
+    const temp = [];
+    temp.push(new coor(cell.x, cell.y));
+    temp.push(new coor(cell.x -1, cell.y));
+    temp.filter(cellExist).forEach(c => maybe(c, true));
 }
 
-function buttonSwitch(thisButton, otherButtons, thisVar, otherVar){
-    thisVar = !thisVar;
-    if(otherVar === false){
-        otherButtons.forEach(function(item){
-            document.getElementById(item).disabled = thisVar;
-        });
-    }
-    thisButton.classList.toggle("active");
-    return thisVar;
+function row(e) {
+    return Math.floor((e.clientY - canvas.offsetTop) / (grid + 1));
 }
+
+function colom(e) {
+    return Math.floor((e.clientX - canvas.offsetLeft) / (grid + 1));
+}
+
+//autoplay
+buildGame();
