@@ -208,7 +208,7 @@ function calc() {
         const cell = new coor(x, y);
         const score = darwin(cell);
         if (state) {
-            return (score < 2 || score > 3) ? cell : [];
+            return score < 2 || score > 3 ? cell : [];
         }
         return score === 3 ? cell : [];
     })).forEach(flip);
