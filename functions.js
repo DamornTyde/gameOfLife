@@ -260,7 +260,7 @@ function maybe(cell, hold) {
 }
 
 function alive(cell) {
-    return (cellExist(cell) && game[cell.x][cell.y]) ? 1 : 0;
+    return cellExist(cell) && game[cell.x][cell.y] ? 1 : 0;
 }
 
 function darwin(cell, rec = 0) {
