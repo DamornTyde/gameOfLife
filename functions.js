@@ -218,16 +218,15 @@ function calc() {
         }
         maybe(new coor(Math.floor(Math.random() * game.length), Math.floor(Math.random() * game[0].length)), true);
     }
-    const automated = [borderA, tankA, randomA];
-    if (automated.findIndex(i => i) > -1) {
+    if ([borderA, tankA, randomA].findIndex(i => i) > -1) {
         if (history.filter(i => i.length === change.length).findIndex(r => r.map((i, c) => i.x === change[c].x && i.y === change[c].y ? [] : c).flat().length === 0) > -1) {
-            if (automated[0]) {
+            if (borderA) {
                 border.click();
             }
-            if (automated[1]) {
+            if (tankA) {
                 tank.click();
             }
-            if (automated[2]) {
+            if (randomA) {
                 random.click();
             }
         }
